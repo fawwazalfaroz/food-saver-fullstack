@@ -10,9 +10,14 @@ async function bootstrap() {
     whitelist: true, // Otomatis membuang properti asing yang tidak ada di DTO
   }));
 
-  // Mengaktifkan CORS untuk port 3000
+  // Mengaktifkan CORS untuk frontend
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',
+      'https://food-saver-v1.netlify.app',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean) as string[],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
 
