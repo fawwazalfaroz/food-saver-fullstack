@@ -86,7 +86,7 @@ export default function Home() {
                   Mulai Belanja
                 </button>
               </Link>
-              <Link href="/merchant/register">
+              <Link href="/register">
                 <button className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold rounded-md border border-gray-300 dark:border-slate-700 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
                   Daftar Merchant
                 </button>
