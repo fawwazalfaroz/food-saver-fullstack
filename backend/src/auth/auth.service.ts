@@ -12,7 +12,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async register(dto: RegisterDto) {
     const existingUser = await this.prisma.user.findUnique({
@@ -66,7 +66,7 @@ export class AuthService {
 
     // 4. Jika sukses, buat tiket JWT (Payload)
     const payload = { sub: user.id, email: user.email, role: user.role };
-    
+
     // 5. Kembalikan token ke pengguna
     return {
       message: 'Login berhasil',
@@ -80,11 +80,11 @@ export class AuthService {
       where: { id: userId },
       include: { toko: true },
     });
-    
+
     if (!user) {
       throw new UnauthorizedException('User tidak ditemukan');
     }
-    
+
     // Hilangkan password sebelum dikembalikan
     const { password, ...result } = user;
     return result;
@@ -101,21 +101,21 @@ export class AuthService {
     });
 
     // 2. Jika user adalah PENYEDIA dan ingin update data toko
-    if (updatedUser.role === 'PENYEDIA' && (dto.alamat_toko || dto.latitude !== undefined || dto.longitude !== undefined)) {
-      // Karena kita tidak yakin toko sudah dibuat atau belum, kita pakai findFirst dulu
+    if (updatedUser.role === 'PENYEDIA' && (dto.nama_toko || dto.alamat_toko || dto.jam_operasional || dto.latitude !== undefined || dto.longitude !== undefined)) {
       const toko = await this.prisma.toko.findUnique({ where: { penyedia_id: userId } });
-      
+
       if (toko) {
         await this.prisma.toko.update({
           where: { id: toko.id },
           data: {
+            ...(dto.nama_toko !== undefined && { nama_toko: dto.nama_toko }),
             ...(dto.alamat_toko !== undefined && { alamat_toko: dto.alamat_toko }),
+            ...(dto.jam_operasional !== undefined && { jam_operasional: dto.jam_operasional }),
             ...(dto.latitude !== undefined && { latitude: dto.latitude }),
             ...(dto.longitude !== undefined && { longitude: dto.longitude }),
           },
         });
       }
-      // Jika toko belum ada, abaikan (mereka harus membuat toko via halaman dashboard)
     }
 
     return await this.getProfile(userId);

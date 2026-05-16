@@ -28,6 +28,9 @@ model User {
 
   // Relasi: 1 Penyedia memiliki 1 Toko
   toko       Toko?
+
+  // Relasi: 1 Pembeli bisa memiliki banyak Pesanan
+  pesanan    Pesanan[]
 }
 
 model Toko {
@@ -50,6 +53,9 @@ model Toko {
 
   // Relasi: 1 Toko memiliki banyak Produk
   produk           Produk[]
+
+  // Relasi: 1 Toko memiliki banyak Pesanan
+  pesanan          Pesanan[]
 }
 
 model Produk {
@@ -62,9 +68,41 @@ model Produk {
   stok         Int
   foto         String   // Berisi URL foto
   waktu_pickup String
+  is_active    Boolean  @default(true)
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
   // Relasi ke Toko
   toko         Toko     @relation(fields: [toko_id], references: [id], onDelete: Cascade)
+
+  // Relasi: 1 Produk bisa memiliki banyak Pesanan
+  pesanan      Pesanan[]
+}
+
+// Status Pesanan
+enum StatusPesanan {
+  MENUNGGU_PEMBAYARAN
+  DIBAYAR
+  MENUNGGU_DIAMBIL
+  SELESAI
+  DIBATALKAN
+}
+
+model Pesanan {
+  id           String        @id @default(uuid())
+  pembeli_id   String
+  produk_id    String
+  toko_id      String
+  jumlah       Int           @default(1)
+  total_harga  Int
+  status       StatusPesanan @default(MENUNGGU_PEMBAYARAN)
+  snap_token   String?
+  midtrans_id  String?       @unique
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+
+  // Relasi
+  pembeli      User          @relation(fields: [pembeli_id], references: [id], onDelete: Cascade)
+  produk       Produk        @relation(fields: [produk_id], references: [id], onDelete: Cascade)
+  toko         Toko          @relation(fields: [toko_id], references: [id], onDelete: Cascade)
 }

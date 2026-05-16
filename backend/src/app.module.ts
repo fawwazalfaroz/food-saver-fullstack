@@ -5,10 +5,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { TokoModule } from './toko/toko.module';
 import { ProdukModule } from './produk/produk.module';
+import { PesananModule } from './pesanan/pesanan.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, TokoModule, ProdukModule],
+  imports: [PrismaModule, AuthModule, TokoModule, ProdukModule, PesananModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

@@ -20,6 +20,11 @@ export class ProdukController {
     return await this.produkService.findAll();
   }
 
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return await this.produkService.findOne(id);
+  }
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async update(
@@ -28,6 +33,12 @@ export class ProdukController {
     @Body() dto: UpdateProdukDto,
   ) {
     return await this.produkService.update(userId, id, dto);
+  }
+
+  @Patch(':id/toggle-status')
+  @UseGuards(JwtAuthGuard)
+  async toggleStatus(@GetUser('sub') userId: string, @Param('id') id: string) {
+    return await this.produkService.toggleStatus(userId, id);
   }
 
   @Delete(':id')

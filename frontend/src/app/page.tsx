@@ -1,9 +1,27 @@
 "use client";
 import Link from 'next/link';
-import { useState } from 'react';
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      try {
+        // Decode JWT payload (base64)
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setIsLoggedIn(true);
+        setUserRole(payload.role || null);
+      } catch {
+        setIsLoggedIn(false);
+        setUserRole(null);
+      }
+    }
+  }, []);
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
@@ -25,20 +43,28 @@ export default function Home() {
       <header className="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-colors duration-200">
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-emerald-600 flex items-center justify-center shadow-sm">
-              <svg className="w-4 h-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-slate-900 dark:text-white font-bold tracking-tight">FoodSaver</span>
+            <Image src="/FoodSaver_Green.png" alt="Logo" width={32} height={32} className="object-contain" />
+            <span className="text-slate-900 dark:text-white font-bold text-xl tracking-tight">Food Saver</span>
           </Link>
           <div className="flex gap-4">
-            <Link href="/login">
-              <button className="px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Masuk</button>
-            </Link>
-            <Link href="/register">
-              <button className="px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 transition-colors">Daftar</button>
-            </Link>
+            {!isLoggedIn ? (
+              <>
+                <Link href="/login">
+                  <button className="px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Masuk</button>
+                </Link>
+                <Link href="/register">
+                  <button className="px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 transition-colors">Daftar</button>
+                </Link>
+              </>
+            ) : userRole === 'PENYEDIA' ? (
+              <Link href="/dashboard">
+                <button className="px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 transition-colors">Ke Dashboard Toko</button>
+              </Link>
+            ) : (
+              <Link href="/marketplace">
+                <button className="px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-md shadow-sm hover:bg-emerald-700 transition-colors">Buka Marketplace</button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -60,7 +86,7 @@ export default function Home() {
                   Mulai Belanja
                 </button>
               </Link>
-              <Link href="/merchant/register">
+              <Link href="/register">
                 <button className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold rounded-md border border-gray-300 dark:border-slate-700 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
                   Daftar Merchant
                 </button>
@@ -274,12 +300,8 @@ export default function Home() {
             {/* Left Column */}
             <div className="md:col-span-5 flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-md bg-emerald-600 flex items-center justify-center shadow-sm">
-                  <svg className="w-4 h-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span className="text-slate-900 dark:text-white font-extrabold text-lg tracking-tight">FoodSaver</span>
+                <Image src="/FoodSaver_Green.png" alt="Logo" width={32} height={32} className="object-contain" />
+                <span className="text-slate-900 dark:text-white font-extrabold text-lg tracking-tight">Food Saver</span>
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
                 Misi kami adalah mengakhiri limbah makanan di Indonesia. Bergabunglah dengan kami untuk menyelamatkan makanan enak setiap harinya.

@@ -35,6 +35,19 @@ export class ProdukService {
     });
   }
 
+  async findOne(id: string) {
+    const produk = await this.prisma.produk.findUnique({
+      where: { id },
+      include: { toko: true },
+    });
+
+    if (!produk) {
+      throw new NotFoundException('Produk tidak ditemukan.');
+    }
+
+    return produk;
+  }
+
   async update(userId: string, id: string, dto: Partial<CreateProdukDto>) {
     // 1. Pastikan toko adalah milik user yang sedang request
     const toko = await this.prisma.toko.findUnique({
@@ -58,6 +71,32 @@ export class ProdukService {
     return await this.prisma.produk.update({
       where: { id },
       data: dto,
+    });
+  }
+
+  async toggleStatus(userId: string, id: string) {
+    // 1. Pastikan toko adalah milik user yang sedang request
+    const toko = await this.prisma.toko.findUnique({
+      where: { penyedia_id: userId },
+    });
+
+    if (!toko) {
+      throw new NotFoundException('Toko tidak ditemukan.');
+    }
+
+    // 2. Pastikan produk ada dan milik toko tersebut
+    const existingProduk = await this.prisma.produk.findFirst({
+      where: { id: id, toko_id: toko.id },
+    });
+
+    if (!existingProduk) {
+      throw new NotFoundException('Produk tidak ditemukan atau Anda tidak memiliki akses.');
+    }
+
+    // 3. Toggle nilai is_active
+    return await this.prisma.produk.update({
+      where: { id },
+      data: { is_active: !existingProduk.is_active },
     });
   }
 

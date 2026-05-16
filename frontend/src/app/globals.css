@@ -38,7 +38,7 @@
   --font-sans: Montserrat, sans-serif;
   --font-serif: Merriweather, serif;
   --font-mono: Source Code Pro, monospace;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --shadow-x: 0;
   --shadow-y: 1px;
   --shadow-blur: 3px;
@@ -93,7 +93,7 @@
   --font-sans: Montserrat, sans-serif;
   --font-serif: Merriweather, serif;
   --font-mono: Source Code Pro, monospace;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --shadow-x: 0;
   --shadow-y: 1px;
   --shadow-blur: 3px;
@@ -169,5 +169,51 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* ── Consistent Card ── */
+  .ui-card {
+    @apply bg-card text-card-foreground rounded-xl border border-border/60 shadow-sm;
+  }
+
+  /* ── Primary Button ── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm shadow-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ── Secondary / Outline Button ── */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-border bg-background text-foreground font-semibold text-sm hover:bg-muted/50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ── Ghost Button ── */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-muted-foreground font-medium text-sm hover:bg-muted/50 hover:text-foreground transition-colors;
+  }
+
+  /* ── Danger Button ── */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-destructive/30 text-destructive font-semibold text-sm hover:bg-destructive/10 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ── Status Badges ── */
+  .badge-pending {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/60;
+  }
+  .badge-success {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/60;
+  }
+  .badge-cancelled {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/60;
+  }
+  .badge-waiting {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800/60;
+  }
+
+  /* ── Page Section Spacing ── */
+  .page-section {
+    @apply mb-8;
   }
 }
