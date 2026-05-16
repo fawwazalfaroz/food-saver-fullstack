@@ -1,5 +1,5 @@
 // Helper function untuk memanggil API backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   // Ambil token dari localStorage jika ada
