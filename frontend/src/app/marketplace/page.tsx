@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Clock, MapPin, Store, UserCircle, Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Clock, MapPin, Store, UserCircle, Search, ShoppingBag, LogOut, ChevronDown } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
 import { fetchApi } from '@/lib/api';
 
 export default function MarketplacePage() {
@@ -13,6 +14,20 @@ export default function MarketplacePage() {
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    document.title = 'Marketplace | Food Saver';
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     async function loadProducts() {
@@ -54,6 +69,7 @@ export default function MarketplacePage() {
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
+    document.cookie = 'user_role=; path=/; max-age=0; SameSite=Lax';
     window.location.href = '/login';
   };
 
@@ -63,21 +79,54 @@ export default function MarketplacePage() {
       <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-              <span className="text-primary-foreground font-bold text-lg leading-none">F</span>
-            </div>
-            <span className="text-lg font-bold tracking-tight group-hover:text-primary transition-colors">
-              Food Saver
-            </span>
+            <Image src="/FoodSaver_Green.png" alt="Logo" width={32} height={32} className="object-contain" />
+            <span className="font-bold text-xl">Food Saver</span>
           </Link>
 
-          <nav className="flex items-center gap-4 flex-1 justify-end ml-4">
-            <Link href="/profile" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors shrink-0">
-              <UserCircle className="w-5 h-5" />
-              <span className="hidden md:inline">Profil</span>
-            </Link>
-            <div className="w-px h-6 bg-border mx-1 shrink-0"></div>
-            <Button variant="ghost" size="sm" className="font-medium shrink-0" onClick={handleLogout}>Logout</Button>
+          <nav className="flex items-center gap-2 flex-1 justify-end ml-4">
+            {/* Profile Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setProfileOpen(prev => !prev)}
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted/50 transition-colors"
+                aria-haspopup="true"
+                aria-expanded={profileOpen}
+              >
+                <UserCircle className="w-5 h-5 shrink-0" />
+                <span className="hidden sm:inline">Akun Saya</span>
+                <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {profileOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-background border border-border/60 rounded-xl shadow-lg z-50 overflow-hidden">
+                  <Link
+                    href="/profile"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+                  >
+                    <UserCircle className="w-4 h-4 text-muted-foreground" />
+                    Profil Saya
+                  </Link>
+                  <Link
+                    href="/orders"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+                  >
+                    <ShoppingBag className="w-4 h-4 text-muted-foreground" />
+                    Pesanan Saya
+                  </Link>
+                  <div className="border-t border-border/60" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </nav>
         </div>
       </header>
@@ -120,7 +169,7 @@ export default function MarketplacePage() {
               return (
                 <Card key={product.id} className="group overflow-hidden border-border/60 bg-card hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 flex flex-col">
                   {/* Image Section */}
-                  <div className="relative w-full h-48 overflow-hidden bg-muted">
+                  <Link href={`/product/${product.id}`} className="block relative w-full h-48 overflow-hidden bg-muted">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={product.foto} 
@@ -135,7 +184,7 @@ export default function MarketplacePage() {
                     <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground font-medium px-2.5 py-1 rounded-md text-xs shadow-sm">
                       Sisa {product.stok} porsi
                     </div>
-                  </div>
+                  </Link>
 
                   <CardContent className="p-5 flex-1 flex flex-col">
                     {/* Merchant Info */}
@@ -178,9 +227,11 @@ export default function MarketplacePage() {
                         {formatRupiah(product.harga_diskon)}
                       </span>
                     </div>
-                    <Button className="font-bold px-6 shadow-sm hover:shadow-md transition-all mt-4">
-                      Pesan
-                    </Button>
+                    <Link href={`/product/${product.id}`}>
+                      <Button className="font-bold px-6 shadow-sm hover:shadow-md transition-all mt-4">
+                        Lihat Detail
+                      </Button>
+                    </Link>
                   </CardFooter>
                 </Card>
               );

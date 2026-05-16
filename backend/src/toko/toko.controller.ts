@@ -6,7 +6,7 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 
 @Controller('toko')
 export class TokoController {
-  constructor(private readonly tokoService: TokoService) {}
+  constructor(private readonly tokoService: TokoService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard) // <--- Pasang Gembok di sini!
@@ -18,8 +18,10 @@ export class TokoController {
   }
 
   @Get('my-store')
-  @UseGuards(JwtAuthGuard) // <--- Pasang Gembok di sini juga!
+  @UseGuards(JwtAuthGuard)
   async getMyStore(@GetUser('sub') userId: string) {
-    return await this.tokoService.getMyStore(userId);
+    const toko = await this.tokoService.getMyStore(userId);
+    // Return null as explicit JSON null (not empty body) so fetchApi can parse it safely
+    return toko ?? null;
   }
 }

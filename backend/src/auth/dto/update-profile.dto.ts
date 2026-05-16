@@ -12,7 +12,15 @@ export class UpdateProfileDto {
   // Khusus PENYEDIA
   @IsString()
   @IsOptional()
+  nama_toko?: string;
+
+  @IsString()
+  @IsOptional()
   alamat_toko?: string;
+
+  @IsString()
+  @IsOptional()
+  jam_operasional?: string;
 
   @IsNumber()
   @IsOptional()
