@@ -4,7 +4,7 @@ import { CreateProdukDto } from './dto/create-produk.dto';
 
 @Injectable()
 export class ProdukService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(userId: string, dto: CreateProdukDto) {
     // 1. Cari dulu toko mana yang dimiliki oleh user ini
@@ -31,7 +31,8 @@ export class ProdukService {
 
   async findAll() {
     return await this.prisma.produk.findMany({
-      include: { toko: true }, // Biar pembeli tahu ini makanan dari toko mana
+      where: { is_active: true },
+      include: { toko: true },
     });
   }
 
