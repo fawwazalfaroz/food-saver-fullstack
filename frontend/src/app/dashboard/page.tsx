@@ -598,11 +598,12 @@ export default function DashboardPage() {
                 {merchantProducts.map((product: any) => {
                   const isActive = product.is_active !== false;
                   const isToggling = togglingProducts.has(product.id);
+                  const isOutOfStock = product.stok === 0;
                   return (
                     <div
                       key={product.id}
                       className={`p-4 sm:p-6 transition-colors flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center ${
-                        isActive ? 'hover:bg-muted/10' : 'bg-muted/30 opacity-70'
+                        isActive && !isOutOfStock ? 'hover:bg-muted/10' : 'bg-muted/30 opacity-70'
                       }`}
                     >
                       {/* Product Image */}
@@ -621,8 +622,16 @@ export default function DashboardPage() {
                           <h3 className="font-bold text-base sm:text-lg truncate">
                             {product.nama_makanan}
                           </h3>
-                          <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 shrink-0">
-                            Sisa {product.stok}
+                          <div className="flex items-center gap-2 shrink-0">
+                            {isOutOfStock ? (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-destructive/10 text-destructive border border-destructive/20">
+                                Stok Habis
+                              </span>
+                            ) : (
+                              <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                Sisa {product.stok}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
@@ -649,22 +658,22 @@ export default function DashboardPage() {
                         {/* Toggle ON/OFF */}
                         <button
                           onClick={() => handleToggleProduct(product.id)}
-                          disabled={isToggling}
-                          title={isActive ? 'Nonaktifkan produk' : 'Aktifkan produk'}
-                          className={`relative inline-flex h-7 w-12 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 ${
-                            isActive
+                          disabled={isToggling || isOutOfStock}
+                          title={isOutOfStock ? 'Tambah stok untuk mengaktifkan' : isActive ? 'Nonaktifkan produk' : 'Aktifkan produk'}
+                          className={`relative inline-flex h-7 w-12 items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            isActive && !isOutOfStock
                               ? 'bg-emerald-500 border-emerald-600'
                               : 'bg-muted border-border'
                           }`}
                         >
                           <span
                             className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
-                              isActive ? 'translate-x-6' : 'translate-x-1'
+                              isActive && !isOutOfStock ? 'translate-x-6' : 'translate-x-1'
                             }`}
                           />
                         </button>
-                        <span className={`text-xs font-medium ${isActive ? 'text-emerald-600' : 'text-muted-foreground'}`}>
-                          {isToggling ? '...' : isActive ? 'Aktif' : 'Nonaktif'}
+                        <span className={`text-xs font-medium ${isActive && !isOutOfStock ? 'text-emerald-600' : 'text-muted-foreground'}`}>
+                          {isToggling ? '...' : isOutOfStock ? 'Habis' : isActive ? 'Aktif' : 'Nonaktif'}
                         </span>
 
                         <div className="flex gap-2 sm:mt-1">

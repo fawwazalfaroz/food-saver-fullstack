@@ -32,10 +32,18 @@ export class PesananService {
     const totalHarga = produk.harga_diskon * dto.jumlah;
 
     // Kurangi stok
-    await this.prisma.produk.update({
+    const updatedProduk = await this.prisma.produk.update({
       where: { id: dto.produk_id },
       data: { stok: { decrement: dto.jumlah } },
     });
+
+    // Auto-deactivate if stock reaches 0
+    if (updatedProduk.stok === 0) {
+      await this.prisma.produk.update({
+        where: { id: dto.produk_id },
+        data: { is_active: false },
+      });
+    }
 
     // Ambil data pembeli
     const pembeli = await this.prisma.user.findUnique({
@@ -214,6 +222,15 @@ export class PesananService {
           midtrans_id: payload.transaction_id || null,
         },
       });
+
+      // Check if product stock is now 0 and auto-deactivate
+      const produk = await this.prisma.produk.findUnique({ where: { id: pesanan.produk_id } });
+      if (produk && produk.stok === 0 && produk.is_active) {
+        await this.prisma.produk.update({
+          where: { id: pesanan.produk_id },
+          data: { is_active: false },
+        });
+      }
 
       return { message: 'Payment successful, order status updated to MENUNGGU_DIAMBIL' };
     }

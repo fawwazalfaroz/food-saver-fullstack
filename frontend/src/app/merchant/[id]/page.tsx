@@ -128,43 +128,68 @@ export default function MerchantDetailPage() {
           <p className="text-muted-foreground">Belum ada produk aktif dari toko ini.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {toko.produk.map((product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.id}`}
-                className="ui-card overflow-hidden group hover:shadow-md hover:border-primary/30 transition-all flex flex-col"
-              >
-                {/* Image */}
-                <div className="relative w-full h-48 overflow-hidden bg-muted">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={product.foto}
-                    alt={product.nama_makanan}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground font-bold px-2.5 py-1 rounded-md text-xs shadow-sm">
-                    Hemat {Math.round((1 - product.harga_diskon / product.harga_asli) * 100)}%
+            {toko.produk.map((product) => {
+              const isOutOfStock = product.stok === 0;
+              return (
+                <div
+                  key={product.id}
+                  className={`ui-card overflow-hidden flex flex-col transition-all ${isOutOfStock ? 'opacity-60' : 'hover:shadow-md hover:border-primary/30'}`}
+                >
+                  {/* Image */}
+                  <div className="relative w-full h-48 overflow-hidden bg-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={product.foto}
+                      alt={product.nama_makanan}
+                      className="w-full h-full object-cover"
+                    />
+                    {isOutOfStock ? (
+                      <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                        <span className="bg-destructive text-destructive-foreground font-bold px-3 py-1.5 rounded-md text-sm shadow-md">
+                          Habis Terjual
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground font-bold px-2.5 py-1 rounded-md text-xs shadow-sm">
+                          Hemat {Math.round((1 - product.harga_diskon / product.harga_asli) * 100)}%
+                        </div>
+                        <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground font-medium px-2.5 py-1 rounded-md text-xs shadow-sm">
+                          Sisa {product.stok} porsi
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground font-medium px-2.5 py-1 rounded-md text-xs shadow-sm">
-                    Sisa {product.stok} porsi
-                  </div>
-                </div>
 
-                {/* Info */}
-                <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="font-bold text-lg leading-tight mb-1 line-clamp-2">{product.nama_makanan}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3 flex-1">{product.deskripsi}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 bg-muted/50 p-2 rounded-md">
-                    <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    <span>Ambil: <span className="font-medium text-foreground">{product.waktu_pickup}</span></span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground line-through">{formatRupiah(product.harga_asli)}</span>
-                    <span className="text-lg font-bold text-primary">{formatRupiah(product.harga_diskon)}</span>
+                  {/* Info */}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="font-bold text-lg leading-tight mb-1 line-clamp-2">{product.nama_makanan}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3 flex-1">{product.deskripsi}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 bg-muted/50 p-2 rounded-md">
+                      <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      <span>Ambil: <span className="font-medium text-foreground">{product.waktu_pickup}</span></span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground line-through">{formatRupiah(product.harga_asli)}</span>
+                        <span className="text-lg font-bold text-primary">{formatRupiah(product.harga_diskon)}</span>
+                      </div>
+                      {isOutOfStock ? (
+                        <button disabled className="px-3 py-1.5 text-xs font-bold rounded-lg bg-muted text-muted-foreground cursor-not-allowed">
+                          Habis Terjual
+                        </button>
+                      ) : (
+                        <Link href={`/product/${product.id}`}>
+                          <button className="px-3 py-1.5 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
+                            Beli
+                          </button>
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
