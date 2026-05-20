@@ -1,13 +1,12 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTokoDto } from './dto/create-toko.dto';
 
 @Injectable()
 export class TokoService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(userId: string, dto: CreateTokoDto) {
-    // 1. Cek apakah user ini sudah memiliki toko
     const existingToko = await this.prisma.toko.findUnique({
       where: { penyedia_id: userId },
     });
@@ -16,7 +15,6 @@ export class TokoService {
       throw new ConflictException('Satu akun penyedia hanya boleh memiliki satu toko.');
     }
 
-    // 2. Simpan data toko baru
     return await this.prisma.toko.create({
       data: {
         ...dto,
@@ -28,7 +26,26 @@ export class TokoService {
   async getMyStore(userId: string) {
     return await this.prisma.toko.findUnique({
       where: { penyedia_id: userId },
-      include: { produk: true }, // Mengambil data toko beserta daftar produknya
+      include: { produk: true },
     });
+  }
+
+  // Public: Get store with active products only
+  async findOnePublic(id: string) {
+    const toko = await this.prisma.toko.findUnique({
+      where: { id },
+      include: {
+        produk: {
+          where: { is_active: true },
+          orderBy: { created_at: 'desc' },
+        },
+      },
+    });
+
+    if (!toko) {
+      throw new NotFoundException('Toko tidak ditemukan.');
+    }
+
+    return toko;
   }
 }

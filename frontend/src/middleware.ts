@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Routes that require authentication
 const MERCHANT_ONLY = ['/dashboard'];
-const CONSUMER_ONLY = ['/marketplace', '/product', '/checkout', '/orders'];
+const CONSUMER_ONLY = ['/marketplace', '/product', '/checkout', '/orders', '/merchant'];
 const AUTH_REQUIRED = ['/profile']; // Accessible by both roles, but requires login
 const AUTH_PAGES = ['/login', '/register'];
 

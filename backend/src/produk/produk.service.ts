@@ -30,10 +30,28 @@ export class ProdukService {
   }
 
   async findAll() {
-    return await this.prisma.produk.findMany({
-      where: { is_active: true },
-      include: { toko: true },
+    // Get all distinct toko_ids that have active products
+    const tokos = await this.prisma.toko.findMany({
+      where: {
+        produk: { some: { is_active: true } },
+      },
+      select: { id: true },
     });
+
+    // For each toko, get top 3 latest active products
+    const results = await Promise.all(
+      tokos.map((toko) =>
+        this.prisma.produk.findMany({
+          where: { toko_id: toko.id, is_active: true },
+          include: { toko: true },
+          orderBy: { created_at: 'desc' },
+          take: 3,
+        }),
+      ),
+    );
+
+    // Flatten into a single array
+    return results.flat();
   }
 
   async findOne(id: string) {

@@ -169,7 +169,7 @@ export default function MarketplacePage() {
               return (
                 <Card key={product.id} className="group overflow-hidden border-border/60 bg-card hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 flex flex-col">
                   {/* Image Section */}
-                  <Link href={`/product/${product.id}`} className="block relative w-full h-48 overflow-hidden bg-muted">
+                  <Link href={`/merchant/${product.toko_id}`} className="block relative w-full h-48 overflow-hidden bg-muted">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={product.foto} 
@@ -227,9 +227,9 @@ export default function MarketplacePage() {
                         {formatRupiah(product.harga_diskon)}
                       </span>
                     </div>
-                    <Link href={`/product/${product.id}`}>
+                    <Link href={`/merchant/${product.toko_id}`}>
                       <Button className="font-bold px-6 shadow-sm hover:shadow-md transition-all mt-4">
-                        Lihat Detail
+                        Lihat Toko
                       </Button>
                     </Link>
                   </CardFooter>
