@@ -161,6 +161,34 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+
+  /* ── Food Saver Landing — Color tokens ── */
+  --color-cream: #F7F0E1;
+  --color-cream-deep: #EFE6D1;
+  --color-cream-card: #FBF6EA;
+  --color-paper: #FFFCF4;
+  --color-ink: #1F2A1B;
+  --color-ink-soft: #3D4A35;
+  --color-ink-mute: #6E7861;
+  --color-matcha: #5C7D3E;
+  --color-matcha-deep: #3F5A28;
+  --color-matcha-soft: #A9C078;
+  --color-matcha-tint: #D9E5BE;
+  --color-saffron: #E88A3C;
+  --color-saffron-deep: #C76D1F;
+  --color-saffron-soft: #F4B97A;
+  --color-butter: #F2C94C;
+  --color-tomato: #D8553B;
+  --color-plum: #6E3F58;
+
+  /* ── Food Saver Landing — Font families ── */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-scribble: var(--font-scribble);
+
+  /* ── Food Saver Landing — Custom screens ── */
+  --breakpoint-md2: 980px;
+  --breakpoint-sm2: 560px;
 }
 
 @layer base {
@@ -216,4 +244,242 @@
   .page-section {
     @apply mb-8;
   }
+}
+
+
+/* ════════════════════════════════════════════════════
+   FOOD SAVER LANDING PAGE — GLOBAL STYLES
+   Scoped to .fs-landing root to avoid affecting dashboard/marketplace.
+   ════════════════════════════════════════════════════ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Visible focus ring for accessibility */
+.fs-landing :focus-visible {
+  outline: 2px solid #C76D1F;
+  outline-offset: 2px;
+}
+
+/* Landing page root: warm cream bg + paper-grain texture */
+.fs-landing {
+  background: #F7F0E1;
+  color: #1F2A1B;
+  font-family: var(--font-body), "Plus Jakarta Sans", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  position: relative;
+}
+
+.fs-landing::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(92, 125, 62, 0.05) 1px, transparent 1.2px),
+    radial-gradient(rgba(232, 138, 60, 0.04) 1px, transparent 1.2px);
+  background-size: 18px 18px, 24px 24px;
+  background-position: 0 0, 9px 9px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.9;
+}
+
+.fs-landing > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Display family helper ── */
+.fs-landing .font-display {
+  font-family: var(--font-display), "Bricolage Grotesque", system-ui, sans-serif;
+  font-variation-settings: "opsz" 56;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.fs-landing .font-scribble {
+  font-family: var(--font-scribble), "Caveat", cursive;
+}
+
+/* ── Eyebrow pill (reusable) ── */
+.fs-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #D9E5BE;
+  color: #3F5A28;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1.5px solid #3F5A28;
+}
+
+.fs-eyebrow .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3F5A28;
+  animation: fs-pulse 1.6s infinite;
+}
+
+@keyframes fs-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ── Float animation for hero accents ── */
+@keyframes fs-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.fs-float {
+  animation: fs-float 4s ease-in-out infinite;
+}
+
+/* ── Button system ── */
+.fs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
+  border: 1.5px solid #1F2A1B;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: var(--font-body), "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.fs-btn-primary {
+  background: #5C7D3E;
+  color: #F7F0E1;
+  box-shadow: 0 3px 0 #1F2A1B;
+}
+.fs-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #1F2A1B;
+}
+.fs-btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #1F2A1B;
+}
+
+.fs-btn-saffron {
+  background: #E88A3C;
+  color: #FFFCF4;
+  box-shadow: 0 3px 0 #1F2A1B;
+}
+.fs-btn-saffron:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #1F2A1B;
+}
+.fs-btn-saffron:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #1F2A1B;
+}
+
+.fs-btn-ghost {
+  background: transparent;
+  color: #1F2A1B;
+  border: 1.5px solid transparent;
+  box-shadow: none;
+}
+.fs-btn-ghost:hover {
+  background: #EFE6D1;
+}
+
+.fs-btn-light {
+  background: #FFFCF4;
+  color: #1F2A1B;
+  box-shadow: 0 3px 0 #1F2A1B;
+}
+.fs-btn-light:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #1F2A1B;
+}
+.fs-btn-light:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #1F2A1B;
+}
+
+.fs-btn-hero {
+  padding: 16px 26px;
+  font-size: 16px;
+}
+
+/* ── Hero text effects: swoosh underline + scribble ── */
+.fs-swoosh {
+  position: relative;
+  display: inline-block;
+}
+.fs-swoosh::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: 0.08em;
+  height: 0.42em;
+  background: #E88A3C;
+  border-radius: 999px;
+  transform: skewX(-8deg);
+  z-index: -1;
+  opacity: 0.85;
+}
+
+.fs-scribble {
+  font-family: var(--font-scribble), "Caveat", cursive;
+  color: #C76D1F;
+  display: inline-block;
+  transform: rotate(-3deg);
+  padding-bottom: 16px;
+  font-size: 0.85em;
+  font-weight: 700;
+}
+
+/* ── Brand mark (avocado square) ── */
+.fs-brand-mark {
+  width: 36px;
+  height: 36px;
+  background: #5C7D3E;
+  color: #F7F0E1;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  transform: rotate(-6deg);
+  border: 1.5px solid #1F2A1B;
+  box-shadow: 2px 2px 0 #1F2A1B;
+  flex-shrink: 0;
+}
+
+/* ── Card shadows ── */
+.fs-shadow-card {
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.04),
+    0 18px 32px -20px rgba(31, 42, 27, 0.18);
+}
+.fs-shadow-sticker {
+  box-shadow:
+    0 2px 0 rgba(63, 90, 40, 0.08),
+    0 22px 40px -18px rgba(31, 42, 27, 0.28);
+}
+.fs-shadow-ink-3 {
+  box-shadow: 0 3px 0 #1F2A1B;
+}
+.fs-shadow-ink-4 {
+  box-shadow: 0 4px 0 #1F2A1B;
+}
+.fs-shadow-ink-6 {
+  box-shadow: 6px 6px 0 #1F2A1B;
+}
+.fs-shadow-ink-8 {
+  box-shadow: 8px 8px 0 #1F2A1B;
 }
