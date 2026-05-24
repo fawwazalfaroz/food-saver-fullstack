@@ -50,6 +50,10 @@ export class PaymentService {
       transaction_details: transactionDetails,
       item_details: itemDetails,
       customer_details: customerDetails,
+      expiry: {
+        unit: 'minutes',
+        duration: 5,
+      },
     };
 
     const transaction = await this.snap.createTransaction(parameter);
