@@ -83,4 +83,26 @@ export class PaymentService {
 
     return expectedSignature === payload.signature_key;
   }
+
+  /**
+   * Cancel a pending Midtrans transaction via Core API
+   */
+  async cancelTransaction(orderId: string): Promise<void> {
+    const coreApi = new midtransClient.CoreApi({
+      isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
+      serverKey: this.serverKey,
+      clientKey: process.env.MIDTRANS_CLIENT_KEY || '',
+    });
+
+    try {
+      await coreApi.transaction.cancel(orderId);
+    } catch (error: any) {
+      // If Midtrans says transaction not found or already cancelled/expired, that's fine
+      const statusCode = error?.httpStatusCode || error?.ApiResponse?.status_code;
+      if (statusCode === '404' || statusCode === '412') {
+        return; // Already cancelled or expired — safe to proceed
+      }
+      throw error;
+    }
+  }
 }

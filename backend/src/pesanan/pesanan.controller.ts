@@ -63,4 +63,11 @@ export class PesananController {
   async deleteOrder(@GetUser('sub') userId: string, @Param('id') id: string) {
     return await this.pesananService.deleteOrder(userId, id);
   }
+
+  // Pembeli: Batalkan pesanan yang belum dibayar
+  @Patch(':id/cancel')
+  @UseGuards(JwtAuthGuard)
+  async cancelOrder(@GetUser('sub') userId: string, @Param('id') id: string) {
+    return await this.pesananService.cancelOrder(userId, id);
+  }
 }

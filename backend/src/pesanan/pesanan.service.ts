@@ -304,4 +304,45 @@ export class PesananService {
     await this.prisma.pesanan.delete({ where: { id: pesananId } });
     return { message: 'Riwayat pesanan berhasil dihapus.' };
   }
+
+  // Pembeli: Batalkan pesanan yang belum dibayar
+  async cancelOrder(pembeliId: string, pesananId: string) {
+    const pesanan = await this.prisma.pesanan.findFirst({
+      where: { id: pesananId, pembeli_id: pembeliId },
+    });
+
+    if (!pesanan) {
+      throw new NotFoundException('Pesanan tidak ditemukan.');
+    }
+
+    if (pesanan.status !== 'MENUNGGU_PEMBAYARAN') {
+      throw new BadRequestException('Hanya pesanan yang belum dibayar yang dapat dibatalkan.');
+    }
+
+    // Cancel on Midtrans (if transaction exists there)
+    await this.paymentService.cancelTransaction(pesananId);
+
+    // Restore stock
+    await this.prisma.produk.update({
+      where: { id: pesanan.produk_id },
+      data: { stok: { increment: pesanan.jumlah } },
+    });
+
+    // Re-activate product if it was auto-deactivated due to 0 stock
+    const produk = await this.prisma.produk.findUnique({ where: { id: pesanan.produk_id } });
+    if (produk && !produk.is_active && produk.stok + pesanan.jumlah > 0) {
+      await this.prisma.produk.update({
+        where: { id: pesanan.produk_id },
+        data: { is_active: true },
+      });
+    }
+
+    // Update order status
+    await this.prisma.pesanan.update({
+      where: { id: pesananId },
+      data: { status: 'DIBATALKAN' },
+    });
+
+    return { message: 'Pesanan berhasil dibatalkan.' };
+  }
 }

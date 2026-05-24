@@ -55,6 +55,7 @@ export default function OrdersPage() {
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Pesanan | Food Saver';
@@ -123,6 +124,19 @@ export default function OrdersPage() {
         setPayingId(null);
       },
     });
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!window.confirm('Batalkan pesanan ini? Stok akan dikembalikan.')) return;
+    setCancellingId(orderId);
+    try {
+      await fetchApi(`/pesanan/${orderId}/cancel`, { method: 'PATCH' });
+      await loadOrders();
+    } catch (err: any) {
+      alert(err.message || 'Gagal membatalkan pesanan');
+    } finally {
+      setCancellingId(null);
+    }
   };
 
   const formatRupiah = (price: number) => {
@@ -276,6 +290,22 @@ export default function OrdersPage() {
                             </svg>
                           )}
                           Lanjut Bayar
+                        </button>
+                      )}
+                      {order.status === 'MENUNGGU_PEMBAYARAN' && (
+                        <button
+                          onClick={() => handleCancelOrder(order.id)}
+                          disabled={cancellingId === order.id}
+                          className="btn-danger"
+                        >
+                          {cancellingId === order.id ? (
+                            <div className="w-4 h-4 border-2 border-destructive border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          )}
+                          Batalkan
                         </button>
                       )}
                       {order.status === 'MENUNGGU_DIAMBIL' && (
