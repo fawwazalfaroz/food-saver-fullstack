@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProdukDto } from './dto/create-produk.dto';
 
 @Injectable()
 export class ProdukService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(userId: string, dto: CreateProdukDto) {
     // 1. Cari dulu toko mana yang dimiliki oleh user ini
@@ -30,9 +30,41 @@ export class ProdukService {
   }
 
   async findAll() {
-    return await this.prisma.produk.findMany({
-      include: { toko: true }, // Biar pembeli tahu ini makanan dari toko mana
+    // Get all distinct toko_ids that have active products with stock > 0
+    const tokos = await this.prisma.toko.findMany({
+      where: {
+        produk: { some: { is_active: true, stok: { gt: 0 } } },
+      },
+      select: { id: true },
     });
+
+    // For each toko, get top 3 latest active products with stock > 0
+    const results = await Promise.all(
+      tokos.map((toko) =>
+        this.prisma.produk.findMany({
+          where: { toko_id: toko.id, is_active: true, stok: { gt: 0 } },
+          include: { toko: true },
+          orderBy: { created_at: 'desc' },
+          take: 3,
+        }),
+      ),
+    );
+
+    // Flatten into a single array
+    return results.flat();
+  }
+
+  async findOne(id: string) {
+    const produk = await this.prisma.produk.findUnique({
+      where: { id },
+      include: { toko: true },
+    });
+
+    if (!produk) {
+      throw new NotFoundException('Produk tidak ditemukan.');
+    }
+
+    return produk;
   }
 
   async update(userId: string, id: string, dto: Partial<CreateProdukDto>) {
@@ -58,6 +90,36 @@ export class ProdukService {
     return await this.prisma.produk.update({
       where: { id },
       data: dto,
+    });
+  }
+
+  async toggleStatus(userId: string, id: string) {
+    // 1. Pastikan toko adalah milik user yang sedang request
+    const toko = await this.prisma.toko.findUnique({
+      where: { penyedia_id: userId },
+    });
+
+    if (!toko) {
+      throw new NotFoundException('Toko tidak ditemukan.');
+    }
+
+    // 2. Pastikan produk ada dan milik toko tersebut
+    const existingProduk = await this.prisma.produk.findFirst({
+      where: { id: id, toko_id: toko.id },
+    });
+
+    if (!existingProduk) {
+      throw new NotFoundException('Produk tidak ditemukan atau Anda tidak memiliki akses.');
+    }
+
+    // 3. Toggle nilai is_active — cannot activate if stok is 0
+    if (!existingProduk.is_active && existingProduk.stok === 0) {
+      throw new BadRequestException('Tidak dapat mengaktifkan produk dengan stok 0. Tambah stok terlebih dahulu.');
+    }
+
+    return await this.prisma.produk.update({
+      where: { id },
+      data: { is_active: !existingProduk.is_active },
     });
   }
 

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator';
 
 export class UpdateProdukDto {
   @IsString()
@@ -28,4 +28,8 @@ export class UpdateProdukDto {
   @IsString()
   @IsOptional()
   waktu_pickup?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  is_active?: boolean;
 }

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { fetchApi } from '@/lib/api';
-import { ArrowLeft, UserCircle } from 'lucide-react';
+import { ArrowLeft, UserCircle, MapPin } from 'lucide-react';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -18,6 +18,7 @@ export default function ProfilePage() {
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
+    document.title = 'Profil | Food Saver';
     async function loadProfile() {
       try {
         const data = await fetchApi('/auth/profile');
@@ -50,11 +51,15 @@ export default function ProfilePage() {
 
     // Jika PENYEDIA, tambahkan field toko
     if (profile?.role === 'PENYEDIA') {
+      const namaToko = formData.get('nama_toko');
       const alamat = formData.get('alamat_toko');
+      const jamOp = formData.get('jam_operasional');
       const lat = formData.get('latitude');
       const lng = formData.get('longitude');
-      
+
+      if (namaToko) data.nama_toko = namaToko;
       if (alamat) data.alamat_toko = alamat;
+      if (jamOp) data.jam_operasional = jamOp;
       if (lat) data.latitude = parseFloat(lat as string);
       if (lng) data.longitude = parseFloat(lng as string);
     }
@@ -75,6 +80,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
+    document.cookie = 'user_role=; path=/; max-age=0; SameSite=Lax';
     router.push('/login');
   };
 
@@ -113,7 +119,12 @@ export default function ProfilePage() {
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="bg-muted/30 border-b border-border/40">
             <CardTitle className="text-lg">Informasi Dasar</CardTitle>
-            <CardDescription>Akun Anda terdaftar sebagai <strong className="text-primary">{profile?.role}</strong></CardDescription>
+            <CardDescription>
+              Akun Anda terdaftar sebagai{' '}
+              <strong className="text-primary">
+                {profile?.role === 'PENYEDIA' ? 'Merchant (Penyedia)' : 'Consumer (Pembeli)'}
+              </strong>
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -125,42 +136,90 @@ export default function ProfilePage() {
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email (Tidak dapat diubah)</Label>
-                <Input id="email" type="email" defaultValue={profile?.email} disabled className="bg-muted/50" />
+                <Input id="email" type="email" defaultValue={profile?.email || ''} disabled className="bg-muted/50" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="nama">Nama Lengkap</Label>
-                <Input id="nama" name="nama" defaultValue={profile?.nama} required />
+                <Input id="nama" name="nama" defaultValue={profile?.nama || ''} required />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="no_telepon">Nomor Telepon</Label>
-                <Input id="no_telepon" name="no_telepon" defaultValue={profile?.no_telepon} required />
+                <Input id="no_telepon" name="no_telepon" defaultValue={profile?.no_telepon || ''} required />
               </div>
 
               {/* Form Khusus Penyedia */}
-              {profile?.role === 'PENYEDIA' && (
+              {profile?.role === 'PENYEDIA' && profile?.toko && (
                 <div className="mt-8 pt-6 border-t border-border/60 space-y-6">
                   <h3 className="font-bold text-lg">Informasi Toko</h3>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="nama_toko">Nama Toko</Label>
+                    <Input id="nama_toko" name="nama_toko" defaultValue={profile?.toko?.nama_toko || ''} required />
+                  </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="alamat_toko">Alamat Toko</Label>
-                    <Input id="alamat_toko" name="alamat_toko" defaultValue={profile?.toko?.alamat_toko} />
+                    <Input id="alamat_toko" name="alamat_toko" defaultValue={profile?.toko?.alamat_toko || ''} required />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="latitude">Latitude</Label>
-                      <Input id="latitude" name="latitude" type="number" step="any" defaultValue={profile?.toko?.latitude} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="longitude">Longitude</Label>
-                      <Input id="longitude" name="longitude" type="number" step="any" defaultValue={profile?.toko?.longitude} />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="jam_operasional">Jam Operasional</Label>
+                    <Input id="jam_operasional" name="jam_operasional" defaultValue={profile?.toko?.jam_operasional || ''} placeholder="08:00 - 20:00" required />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    *Alamat dan koordinat diperlukan agar pembeli tahu lokasi penjemputan makanan.
-                  </p>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Lokasi Toko (Koordinat)</Label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!('geolocation' in navigator)) {
+                            alert('Browser Anda tidak mendukung deteksi lokasi otomatis.');
+                            return;
+                          }
+                          navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                              const latInput = document.getElementById('latitude') as HTMLInputElement;
+                              const lngInput = document.getElementById('longitude') as HTMLInputElement;
+                              if (latInput) {
+                                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                                nativeInputValueSetter?.call(latInput, pos.coords.latitude.toFixed(6));
+                                latInput.dispatchEvent(new Event('input', { bubbles: true }));
+                              }
+                              if (lngInput) {
+                                const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                                nativeInputValueSetter?.call(lngInput, pos.coords.longitude.toFixed(6));
+                                lngInput.dispatchEvent(new Event('input', { bubbles: true }));
+                              }
+                            },
+                            () => {
+                              alert('Gagal mengambil lokasi. Pastikan izin lokasi aktif atau isi manual.');
+                            },
+                            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+                          );
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                      >
+                        <MapPin className="w-3.5 h-3.5" />
+                        Ambil Lokasi Otomatis
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label htmlFor="latitude" className="text-xs text-muted-foreground">Latitude</Label>
+                        <Input id="latitude" name="latitude" type="number" step="any" defaultValue={profile?.toko?.latitude ?? ''} />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="longitude" className="text-xs text-muted-foreground">Longitude</Label>
+                        <Input id="longitude" name="longitude" type="number" step="any" defaultValue={profile?.toko?.longitude ?? ''} />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Klik tombol di atas untuk mengisi otomatis, atau sesuaikan secara manual.
+                    </p>
+                  </div>
                 </div>
               )}
 

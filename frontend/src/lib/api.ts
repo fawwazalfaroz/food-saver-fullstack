@@ -1,5 +1,5 @@
 // Helper function untuk memanggil API backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:30015';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   // Ambil token dari localStorage jika ada
@@ -30,6 +30,21 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
 
   // Jika status 204 No Content, langsung return null
   if (response.status === 204) return null;
-  
-  return response.json();
+
+  // Cek apakah response body kosong sebelum memanggil .json()
+  // Ini mencegah "Unexpected end of JSON input" crash
+  const contentLength = response.headers.get('content-length');
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentLength === '0') return null;
+  if (!contentType.includes('application/json')) return null;
+
+  const text = await response.text();
+  if (!text || text.trim() === '' || text.trim() === 'null') return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
