@@ -15,7 +15,7 @@ harga diskon dan pembeli yang mencari makanan berkualitas terjangkau.
 
 Layered Architecture dengan 6 lapisan:
 
-[sisipkan gambar diagram layered architecture di sini]
+<img width="1024" height="559" alt="PHOTO-2026-06-29-22-48-45" src="https://github.com/user-attachments/assets/abbc2080-8088-4071-97d3-7ecb30490bc6" />
 
 ## Features
 
@@ -67,8 +67,3 @@ Layered Architecture dengan 6 lapisan:
    cp .env.example .env.local  # isi NEXT_PUBLIC_API_URL
    npm run dev
 
-## Team
-
-| Nama | NIM | Role |
-|------|-----|------|
-| ... | ... | ... |
